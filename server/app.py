@@ -18,14 +18,48 @@ db.init_app(app)
 
 api = Api(app)
 
-class ClearSession(Resource):
+class Login(Resource):
+    def post(self):
+        user = User.query.filter(User.username == request.get_json()["username"]).first()
 
-    def delete(self):
+        session['user_id'] = user.id
+
+        response = make_response(
+            jsonify(user.to_dict()),
+            200
+        )
+        return response
     
-        session['page_views'] = None
+class Logout(Resource):
+    
+    def delete(self):
         session['user_id'] = None
+        return {'message': '204: No Content'}, 204
+    
+class CheckSession(Resource):
 
-        return {}, 204
+    def get(self):
+        user_id = session.get("user_id")
+
+        if user_id:
+            user = User.query.filter(User.id == user_id).first()
+            response = make_response(
+                jsonify(user.to_dict()),
+                200
+            )
+            return response
+        else:
+            response = make_response({}, 401)
+            return response
+
+
+# class ClearSession(Resource):
+@app.route('/clear')
+def clear_session():
+    session['page_views'] = None
+    session['user_id'] = None
+
+    return {"message": "this worked"}, 204
 
 class IndexArticle(Resource):
     
@@ -48,7 +82,10 @@ class ShowArticle(Resource):
 
         return {'message': 'Maximum pageview limit reached'}, 401
 
-api.add_resource(ClearSession, '/clear')
+api.add_resource(CheckSession, '/check_session')
+api.add_resource(Logout, '/logout')
+api.add_resource(Login, '/login')
+# api.add_resource(ClearSession, '/clear')
 api.add_resource(IndexArticle, '/articles')
 api.add_resource(ShowArticle, '/articles/<int:id>')
 
