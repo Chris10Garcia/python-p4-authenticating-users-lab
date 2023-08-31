@@ -53,13 +53,25 @@ class CheckSession(Resource):
             return response
 
 
-# class ClearSession(Resource):
-@app.route('/clear')
-def clear_session():
-    session['page_views'] = None
-    session['user_id'] = None
 
-    return {"message": "this worked"}, 204
+class ClearSession(Resource):
+
+    # It was a get request to make this work
+    def get(self):
+    
+        session['page_views'] = None
+        session['user_id'] = None
+
+        return {"message": "this worked"}, 204
+api.add_resource(ClearSession, '/clear')
+
+
+# @app.route('/clear')
+# def clear_session():
+#     session['page_views'] = None
+#     session['user_id'] = None
+
+#     return {"message": "this worked"}, 204
 
 class IndexArticle(Resource):
     
@@ -85,7 +97,7 @@ class ShowArticle(Resource):
 api.add_resource(CheckSession, '/check_session')
 api.add_resource(Logout, '/logout')
 api.add_resource(Login, '/login')
-# api.add_resource(ClearSession, '/clear')
+
 api.add_resource(IndexArticle, '/articles')
 api.add_resource(ShowArticle, '/articles/<int:id>')
 
